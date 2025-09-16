@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "e7a380OeUkmtkUkF8GD7N4uUi3OXaWJ5hP8dZBop0uc=",
+  "Source": "SchoolHelpDeskAPI",
+  "BasePath": "_content/SchoolHelpDeskAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
