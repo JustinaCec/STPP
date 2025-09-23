@@ -1,8 +1,8 @@
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copy the .csproj first (Docker layer caching)
+# Copy the project file and restore dependencies
 COPY *.csproj ./
 RUN dotnet restore
 
