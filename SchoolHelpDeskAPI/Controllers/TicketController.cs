@@ -19,10 +19,20 @@ namespace SchoolHelpDeskAPI.Controllers
 
         // GET: api/ticket
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var tickets = await _context.Tickets.Include(t => t.Comments).ToListAsync();
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            IQueryable<Ticket> query = _context.Tickets.Include(t => t.Comments);
+
+            if (userRole == "Student")
+            {
+                query = query.Where(t => t.UserId == userId);
+            }
+
+            var tickets = await query.ToListAsync();
             return Ok(tickets);
         }
 
@@ -47,7 +57,7 @@ namespace SchoolHelpDeskAPI.Controllers
 
         // POST: api/ticket
         [HttpPost]
-        [Authorize(Roles = "Student")]
+        [Authorize]
         public async Task<IActionResult> Create(Ticket ticket)
         {
             ticket.Status = "Open";
@@ -74,8 +84,12 @@ namespace SchoolHelpDeskAPI.Controllers
 
             existing.Title = ticket.Title;
             existing.Description = ticket.Description;
-            existing.TypeId = ticket.TypeId;
-            if (userRole == "Admin") existing.Status = ticket.Status;
+
+            if (userRole == "Admin")
+            {
+                existing.TypeId = ticket.TypeId;
+                existing.Status = ticket.Status;
+            }
 
             await _context.SaveChangesAsync();
             return Ok(existing);

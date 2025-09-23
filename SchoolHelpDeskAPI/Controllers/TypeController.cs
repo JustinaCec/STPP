@@ -19,6 +19,7 @@ namespace SchoolHelpDeskAPI.Controllers
 
         // GET: api/tickettype
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var types = await _context.TicketTypes.ToListAsync();
@@ -27,6 +28,7 @@ namespace SchoolHelpDeskAPI.Controllers
 
         // GET: api/tickettype/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var type = await _context.TicketTypes.FindAsync(id);

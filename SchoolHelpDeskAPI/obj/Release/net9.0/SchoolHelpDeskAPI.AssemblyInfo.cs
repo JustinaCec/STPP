@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SchoolHelpDeskAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3d6fa5e2b50824d98c9f6f370b5f532d2245b4f")]
 [assembly: System.Reflection.AssemblyProductAttribute("SchoolHelpDeskAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SchoolHelpDeskAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

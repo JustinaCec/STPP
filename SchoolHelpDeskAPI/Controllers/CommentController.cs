@@ -22,6 +22,15 @@ namespace SchoolHelpDeskAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll(int ticketId)
         {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null) return NotFound();
+
+            if (userRole == "Student" && ticket.UserId != userId)
+                return Forbid();
+
             var comments = await _context.Comments
                                          .Where(c => c.TicketId == ticketId)
                                          .ToListAsync();
@@ -33,8 +42,19 @@ namespace SchoolHelpDeskAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetById(int ticketId, int id)
         {
-            var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id && c.TicketId == ticketId);
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null) return NotFound();
+
+            if (userRole == "Student" && ticket.UserId != userId)
+                return Forbid();
+
+            var comment = await _context.Comments
+                                        .FirstOrDefaultAsync(c => c.Id == id && c.TicketId == ticketId);
             if (comment == null) return NotFound();
+
             return Ok(comment);
         }
 
@@ -43,9 +63,19 @@ namespace SchoolHelpDeskAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Create(int ticketId, Comment comment)
         {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null) return NotFound();
+
+            if (userRole == "Student" && ticket.UserId != userId)
+                return Forbid();
+
             comment.TicketId = ticketId;
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetById), new { ticketId = ticketId, id = comment.Id }, comment);
         }
 
@@ -56,11 +86,20 @@ namespace SchoolHelpDeskAPI.Controllers
         {
             if (id != comment.Id) return BadRequest();
 
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null) return NotFound();
+
             var existing = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id && c.TicketId == ticketId);
             if (existing == null) return NotFound();
 
+            if (existing.UserId != userId)
+                return Forbid();
+
             existing.Body = comment.Body;
             await _context.SaveChangesAsync();
+
             return Ok(existing);
         }
 
@@ -69,12 +108,23 @@ namespace SchoolHelpDeskAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int ticketId, int id)
         {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            if (ticket == null) return NotFound();
+
+            if (userRole == "Student" && ticket.UserId != userId)
+                return Forbid();
+
             var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id && c.TicketId == ticketId);
             if (comment == null) return NotFound();
 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
+
     }
 }

@@ -5,10 +5,8 @@
     "\\Controllers",
     "\\Data",
     "\\Models",
-    "\\obj\\Debug",
-    "\\obj\\Release",
     "\\Properties"
   ],
-  "SelectedNode": "\\Controllers\\TypeController.cs",
+  "SelectedNode": "\\Controllers\\UserController.cs",
   "PreviewInSolutionExplorer": false
 }
