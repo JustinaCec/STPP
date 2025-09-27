@@ -8,16 +8,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
-builder.Services.AddDbContext<SchoolHelpDeskContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 33)),
-        mySqlOptions =>
-        {
-            mySqlOptions.EnableRetryOnFailure();
-        }
-    ));
-
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add controllers
 builder.Services.AddControllers();
