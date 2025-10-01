@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Controllers\\UserController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\UserController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\SchoolHelpDeskAPI.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SchoolHelpDeskAPI.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Controllers\\UserController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\UserController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -62,17 +62,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "SchoolHelpDeskAPI.csproj",
               "DocumentMoniker": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\SchoolHelpDeskAPI.csproj",
               "RelativeDocumentMoniker": "SchoolHelpDeskAPI.csproj",
               "ToolTip": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\SchoolHelpDeskAPI.csproj",
               "RelativeToolTip": "SchoolHelpDeskAPI.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-10-01T13:41:34.329Z",
               "EditorCaption": ""
@@ -127,7 +127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "Controllers\\UserController.cs",
@@ -148,8 +148,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAEQAAAAAAAAAAAAIwGEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-16T09:08:31.348Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-16T09:08:31.348Z"
             },
             {
               "$type": "Document",
