@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,7 +23,13 @@ namespace SchoolHelpDeskAPI.Controllers
             _configuration = configuration;
         }
 
-        // POST: api/user/login
+        /// <summary>
+        /// Prisijungia vartotoją ir generuoja JWT tokeną.
+        /// </summary>
+        /// <param name="request">Prisijungimo duomenys</param>
+        /// <returns>JWT tokeną arba Unauthorized atsakymą</returns>
+        /// <response code="200">Prisijungimas sėkmingas</response>
+        /// <response code="401">Neteisingi prisijungimo duomenys</response>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -50,7 +56,13 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(new { Token = jwt });
         }
 
-        // POST: api/user/register
+        /// <summary>
+        /// Registruoja naują vartotoją.
+        /// </summary>
+        /// <param name="request">Registracijos duomenys</param>
+        /// <returns>Patvirtinimo pranešimą arba klaidą</returns>
+        /// <response code="201">Vartotojas sėkmingai sukurtas</response>
+        /// <response code="400">Elektroninio pašto adresas jau egzistuoja</response>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
@@ -70,7 +82,14 @@ namespace SchoolHelpDeskAPI.Controllers
             return StatusCode(201, new { message = "User registered successfully" });
         }
 
-        // PUT: api/user/{id}
+        /// <summary>
+        /// Atnaujina vartotojo duomenis pagal ID.
+        /// </summary>
+        /// <param name="id">Vartotojo ID</param>
+        /// <param name="request">Nauji vartotojo duomenys</param>
+        /// <returns>Atnaujintą vartotoją arba klaidą</returns>
+        /// <response code="200">Vartotojas atnaujintas sėkmingai</response>
+        /// <response code="404">Vartotojas nerastas</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request)
@@ -91,7 +110,13 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(user);
         }
 
-        // DELETE: api/user/{id}
+        /// <summary>
+        /// Ištrina vartotoją pagal ID.
+        /// </summary>
+        /// <param name="id">Vartotojo ID</param>
+        /// <returns>Patvirtinimą arba klaidą</returns>
+        /// <response code="204">Vartotojas sėkmingai ištrintas</response>
+        /// <response code="404">Vartotojas nerastas</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
@@ -104,7 +129,10 @@ namespace SchoolHelpDeskAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/user/logout
+        /// <summary>
+        /// Atsijungia vartotoją.
+        /// </summary>
+        /// <returns>Patvirtinimo pranešimą</returns>
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
