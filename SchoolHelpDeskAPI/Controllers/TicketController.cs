@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolHelpDeskAPI.Data;
 using SchoolHelpDeskAPI.Models;
@@ -17,7 +17,11 @@ namespace SchoolHelpDeskAPI.Controllers
             _context = context;
         }
 
-        // GET: api/ticket
+        /// <summary>
+        /// Gauna visus bilietus. Studentai mato tik savo bilietus.
+        /// </summary>
+        /// <returns>Bilietų sąrašą.</returns>
+        /// <response code="200">Gražina bilietų sąrašą.</response>
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAll()
@@ -36,7 +40,14 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(tickets);
         }
 
-        // GET: api/ticket/5
+        /// <summary>
+        /// Gauna konkretų bilietą pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto ID.</param>
+        /// <returns>Bilieto objektą.</returns>
+        /// <response code="200">Gražina bilietą su komentarais.</response>
+        /// <response code="403">Studentas neturi teisės matyti šio bilieto.</response>
+        /// <response code="404">Bilietas nerastas.</response>
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetById(int id)
@@ -55,7 +66,12 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(ticket);
         }
 
-        // POST: api/ticket
+        /// <summary>
+        /// Sukuria naują bilietą.
+        /// </summary>
+        /// <param name="ticket">Bilieto objektas.</param>
+        /// <returns>Sukurtą bilietą.</returns>
+        /// <response code="201">Bilietas sėkmingai sukurtas.</response>
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Create(Ticket ticket)
@@ -66,7 +82,16 @@ namespace SchoolHelpDeskAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
         }
 
-        // PUT: api/ticket/5
+        /// <summary>
+        /// Atnaujina bilieto duomenis pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto ID.</param>
+        /// <param name="ticket">Atnaujinti bilieto duomenys.</param>
+        /// <returns>Atnaujintą bilietą.</returns>
+        /// <response code="200">Bilietas sėkmingai atnaujintas.</response>
+        /// <response code="400">Neteisingas bilieto ID.</response>
+        /// <response code="403">Neturite teisės atnaujinti šio bilieto.</response>
+        /// <response code="404">Bilietas nerastas.</response>
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> Update(int id, Ticket ticket)
@@ -95,7 +120,14 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(existing);
         }
 
-        // DELETE: api/ticket/5
+        /// <summary>
+        /// Ištrina bilietą pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto ID.</param>
+        /// <returns>Nėra turinio.</returns>
+        /// <response code="204">Bilietas sėkmingai ištrintas.</response>
+        /// <response code="403">Neturite teisės ištrinti šio bilieto.</response>
+        /// <response code="404">Bilietas nerastas.</response>
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)

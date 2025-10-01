@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolHelpDeskAPI.Data;
 using SchoolHelpDeskAPI.Models;
@@ -17,7 +17,11 @@ namespace SchoolHelpDeskAPI.Controllers
             _context = context;
         }
 
-        // GET: api/tickettype
+        /// <summary>
+        /// Gauna visų bilietų tipų sąrašą.
+        /// </summary>
+        /// <returns>Bilietų tipų sąrašą.</returns>
+        /// <response code="200">Gražina bilietų tipų sąrašą.</response>
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
@@ -26,7 +30,13 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(types);
         }
 
-        // GET: api/tickettype/5
+        /// <summary>
+        /// Gauna bilieto tipo informaciją pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto tipo ID.</param>
+        /// <returns>Bilieto tipo objektą.</returns>
+        /// <response code="200">Gražina bilieto tipo informaciją.</response>
+        /// <response code="404">Bilieto tipas nerastas.</response>
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
@@ -36,7 +46,13 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(type);
         }
 
-        // POST: api/tickettype
+        /// <summary>
+        /// Sukuria naują bilieto tipą.
+        /// </summary>
+        /// <param name="type">Bilieto tipo objektas.</param>
+        /// <returns>Sukurtą bilieto tipą.</returns>
+        /// <response code="201">Bilieto tipas sėkmingai sukurtas.</response>
+        /// <response code="400">Neteisingi įvesties duomenys.</response>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(TicketType type)
@@ -48,7 +64,15 @@ namespace SchoolHelpDeskAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = type.Id }, type);
         }
 
-        // PUT: api/tickettype/5
+        /// <summary>
+        /// Atnaujina bilieto tipo informaciją pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto tipo ID.</param>
+        /// <param name="type">Atnaujinti duomenys.</param>
+        /// <returns>Atnaujintą bilieto tipą.</returns>
+        /// <response code="200">Bilieto tipas sėkmingai atnaujintas.</response>
+        /// <response code="400">Neteisingas bilieto tipo ID.</response>
+        /// <response code="404">Bilieto tipas nerastas.</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, TicketType type)
@@ -69,7 +93,13 @@ namespace SchoolHelpDeskAPI.Controllers
             return Ok(type);
         }
 
-        // DELETE: api/tickettype/5
+        /// <summary>
+        /// Ištrina bilieto tipą pagal ID.
+        /// </summary>
+        /// <param name="id">Bilieto tipo ID.</param>
+        /// <returns>Nėra turinio.</returns>
+        /// <response code="204">Bilieto tipas sėkmingai ištrintas.</response>
+        /// <response code="404">Bilieto tipas nerastas.</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
