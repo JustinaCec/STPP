@@ -73,43 +73,56 @@ namespace SchoolHelpDeskAPI.Controllers
         /// <response code="200">Naujas prieigos žetonas sėkmingai sugeneruotas</response>
         /// <response code="401">Atnaujinimo žetonas negaliojantis arba pasibaigęs</response>
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+[HttpPost("refresh-token")]
+public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+{
+    if (request is null || string.IsNullOrEmpty(request.RefreshToken))
+        return BadRequest("Invalid request.");
+
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.RefreshTokens.Contains(request.RefreshToken));
+
+    if (user == null)
+        return Unauthorized("Invalid refresh token.");
+
+    int index = user.RefreshTokens.IndexOf(request.RefreshToken);
+
+    if (index == -1 || user.RefreshTokenExpiries[index] <= DateTime.UtcNow)
+        return Unauthorized("Refresh token expired.");
+
+    var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var tokenDescriptor = new SecurityTokenDescriptor
+    {
+        Subject = new ClaimsIdentity(new Claim[]
         {
-            if (request is null)
-                return BadRequest("Netinkama užklausa.");
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshTokens.Contains(request.RefreshToken));
-            int index = user.RefreshTokens.IndexOf(request.RefreshToken);
-            if (user == null || user.RefreshTokenExpiries[index] <= DateTime.UtcNow)
-                return Unauthorized("Atnaujinimo žetonas negaliojantis arba pasibaigęs.");
-
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
             new Claim("id", user.Id.ToString()),
             new Claim("role", user.Role)
-                }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+        }),
+        Expires = DateTime.UtcNow.AddHours(1),
+        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    };
 
-            var newToken = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(newToken);
+    var newToken = tokenHandler.CreateToken(tokenDescriptor);
+    var jwt = tokenHandler.WriteToken(newToken);
 
-            var newRefreshToken = GenerateRefreshToken();
-            user.RefreshTokens.Add(newRefreshToken);
-            user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
-            await _context.SaveChangesAsync();
+    // Remove used refresh token to invalidate it
+    user.RefreshTokens.RemoveAt(index);
+    user.RefreshTokenExpiries.RemoveAt(index);
 
-            return Ok(new
-            {
-                Token = jwt,
-                RefreshToken = newRefreshToken
-            });
-        }
+    var newRefreshToken = GenerateRefreshToken();
+    user.RefreshTokens.Add(newRefreshToken);
+    user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        Token = jwt,
+        RefreshToken = newRefreshToken
+    });
+}
+
 
         public class RefreshTokenRequest
         {
