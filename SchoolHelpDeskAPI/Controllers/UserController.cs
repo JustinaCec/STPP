@@ -195,7 +195,7 @@ namespace SchoolHelpDeskAPI.Controllers
         /// <returns>Patvirtinimo pranešimą</returns>
         [HttpPost("logout")]
         [Authorize]
-        public async IActionResult Logout([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
         {
             var userId = User.FindFirst("id")?.Value;
             if (userId == null)
