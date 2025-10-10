@@ -100,7 +100,7 @@ namespace SchoolHelpDeskAPI.Controllers
             var jwt = tokenHandler.WriteToken(newToken);
 
             var newRefreshToken = GenerateRefreshToken();
-            user.RefreshTokens.Add(refreshToken);
+            user.RefreshTokens.Add(newRefreshToken);
             user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
             await _context.SaveChangesAsync();
 
@@ -195,7 +195,7 @@ namespace SchoolHelpDeskAPI.Controllers
         /// <returns>Patvirtinimo pranešimą</returns>
         [HttpPost("logout")]
         [Authorize]
-        public IActionResult Logout()
+        public async IActionResult Logout([FromBody] RefreshTokenRequest request)
         {
             var userId = User.FindFirst("id")?.Value;
             if (userId == null)
