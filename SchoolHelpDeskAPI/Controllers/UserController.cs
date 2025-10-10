@@ -35,7 +35,7 @@ namespace SchoolHelpDeskAPI.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password_Hash))
-                return Unauthorized();
+                return Unauthorized("Neteisingi prisijungimo duomenys.");
 
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -52,8 +52,68 @@ namespace SchoolHelpDeskAPI.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var jwt = tokenHandler.WriteToken(token);
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
+            return Ok(new { Token = jwt, RefreshToken = refreshToken });
+        }
+        private static string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+        /// <summary>
+        /// Atnaujina prieigos (JWT) žetoną naudojant atnaujinimo žetoną.
+        /// </summary>
+        /// <param name="request">Atnaujinimo užklausa</param>
+        /// <returns>Naujas prieigos žetonas ir atnaujinimo žetonas</returns>
+        /// <response code="200">Naujas prieigos žetonas sėkmingai sugeneruotas</response>
+        /// <response code="401">Atnaujinimo žetonas negaliojantis arba pasibaigęs</response>
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            if (request is null)
+                return BadRequest("Netinkama užklausa.");
 
-            return Ok(new { Token = jwt });
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                return Unauthorized("Atnaujinimo žetonas negaliojantis arba pasibaigęs.");
+
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+            new Claim("id", user.Id.ToString()),
+            new Claim("role", user.Role)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(30),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var newToken = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(newToken);
+
+            var newRefreshToken = GenerateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Token = jwt,
+                RefreshToken = newRefreshToken
+            });
+        }
+
+        public class RefreshTokenRequest
+        {
+            public string RefreshToken { get; set; } = null!;
         }
 
         /// <summary>
