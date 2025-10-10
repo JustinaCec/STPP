@@ -134,6 +134,8 @@ namespace SchoolHelpDeskAPI.Controllers
                 Email = request.Email,
                 Password_Hash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = request.Role ?? "Student"
+                RefreshTokens = new List<string>(),
+                RefreshTokenExpiries = new List<DateTime>()
             };
 
             _context.Users.Add(user);
