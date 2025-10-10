@@ -54,7 +54,7 @@ namespace SchoolHelpDeskAPI.Controllers
             var jwt = tokenHandler.WriteToken(token);
             var refreshToken = GenerateRefreshToken();
             user.RefreshTokens.Add(refreshToken);
-            user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
+            user.RefreshTokenExpiries.Add(DateTime.SpecifyKind(DateTime.UtcNow.AddDays(7), DateTimeKind.Utc));
             await _context.SaveChangesAsync();
             return Ok(new { Token = jwt, RefreshToken = refreshToken });
         }
@@ -111,7 +111,7 @@ public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest req
 
     var newRefreshToken = GenerateRefreshToken();
     user.RefreshTokens.Add(newRefreshToken);
-    user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
+    user.RefreshTokenExpiries.Add(DateTime.SpecifyKind(DateTime.UtcNow.AddDays(7), DateTimeKind.Utc));
 
     await _context.SaveChangesAsync();
 
