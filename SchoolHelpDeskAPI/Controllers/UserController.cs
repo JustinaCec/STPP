@@ -72,7 +72,6 @@ namespace SchoolHelpDeskAPI.Controllers
         /// <returns>Naujas prieigos žetonas ir atnaujinimo žetonas</returns>
         /// <response code="200">Naujas prieigos žetonas sėkmingai sugeneruotas</response>
         /// <response code="401">Atnaujinimo žetonas negaliojantis arba pasibaigęs</response>
-        [HttpPost("refresh-token")]
 [HttpPost("refresh-token")]
 public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
 {
