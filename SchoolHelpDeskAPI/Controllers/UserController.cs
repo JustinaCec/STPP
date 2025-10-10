@@ -78,9 +78,9 @@ namespace SchoolHelpDeskAPI.Controllers
             if (request is null)
                 return BadRequest("Netinkama užklausa.");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
-
-            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshTokens.Contains(request.RefreshToken));
+            int index = user.RefreshTokens.IndexOf(request.RefreshToken);
+            if (user == null || user.RefreshTokenExpiries[index] <= DateTime.UtcNow)
                 return Unauthorized("Atnaujinimo žetonas negaliojantis arba pasibaigęs.");
 
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);

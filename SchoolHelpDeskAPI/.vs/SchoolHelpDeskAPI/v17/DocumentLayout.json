@@ -40,7 +40,7 @@
               "RelativeDocumentMoniker": "Controllers\\UserController.cs",
               "ToolTip": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Controllers\\UserController.cs",
               "RelativeToolTip": "Controllers\\UserController.cs",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAAAF4AAAA2AAAAAAAAAA==",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAAAEYAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-01T15:05:14.304Z",
               "EditorCaption": ""
@@ -55,8 +55,7 @@
               "RelativeToolTip": "Controllers\\TypeController.cs",
               "ViewState": "AgIAAC4AAAAAAAAAAAAswHMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-01T15:13:13.336Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-01T15:13:13.336Z"
             },
             {
               "$type": "Document",
@@ -66,7 +65,7 @@
               "RelativeDocumentMoniker": "Models\\User.cs",
               "ToolTip": "C:\\Users\\Justina\\Desktop\\STPP\\SchoolHelpDeskAPI\\Models\\User.cs",
               "RelativeToolTip": "Models\\User.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-10T08:26:15.303Z",
               "EditorCaption": ""
@@ -81,8 +80,7 @@
               "RelativeToolTip": "Controllers\\TicketController.cs",
               "ViewState": "AgIAAHcAAAAAAAAAAAAcwJEAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-01T15:09:22.801Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-01T15:09:22.801Z"
             },
             {
               "$type": "Document",
