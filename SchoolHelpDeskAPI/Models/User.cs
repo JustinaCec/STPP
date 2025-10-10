@@ -14,7 +14,7 @@ namespace SchoolHelpDeskAPI.Models
 
         [Required]
         public string Role { get; set; } // "Student" or "Admin"
-        public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public List<string> RefreshTokens { get; set; }
+        public List<DateTime> RefreshTokenExpiries { get; set; }
     }
 }

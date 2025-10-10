@@ -53,8 +53,8 @@ namespace SchoolHelpDeskAPI.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var jwt = tokenHandler.WriteToken(token);
             var refreshToken = GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokens.Add(refreshToken);
+            user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
             await _context.SaveChangesAsync();
             return Ok(new { Token = jwt, RefreshToken = refreshToken });
         }
@@ -92,7 +92,7 @@ namespace SchoolHelpDeskAPI.Controllers
             new Claim("id", user.Id.ToString()),
             new Claim("role", user.Role)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(30),
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -100,8 +100,8 @@ namespace SchoolHelpDeskAPI.Controllers
             var jwt = tokenHandler.WriteToken(newToken);
 
             var newRefreshToken = GenerateRefreshToken();
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokens.Add(refreshToken);
+            user.RefreshTokenExpiries.Add(DateTime.UtcNow.AddDays(7));
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -197,8 +197,23 @@ namespace SchoolHelpDeskAPI.Controllers
         [Authorize]
         public IActionResult Logout()
         {
-            // Optional: Implement token blacklist if needed
-            return Ok(new { message = "User logged out successfully" });
+            var userId = User.FindFirst("id")?.Value;
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user == null)
+                return NotFound();
+
+            int index = user.RefreshTokens.IndexOf(request.RefreshToken);
+            if (index >= 0)
+            {
+                user.RefreshTokens.RemoveAt(index);
+                user.RefreshTokenExpiries.RemoveAt(index);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { message = "Logged out successfully" });
         }
     }
 
