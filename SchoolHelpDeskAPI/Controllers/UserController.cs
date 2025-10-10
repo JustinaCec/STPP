@@ -92,7 +92,7 @@ namespace SchoolHelpDeskAPI.Controllers
             new Claim("id", user.Id.ToString()),
             new Claim("role", user.Role)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(30),
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
