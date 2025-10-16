@@ -221,8 +221,6 @@ public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
     // Always return success, even if the token was not found or already revoked
     return Ok(new { message = "Logged out successfully" });
 }
-
-        }
         /// <summary>
         /// Grąžina visų vartotojų sąrašą (tik administratoriams).
         /// </summary>
@@ -245,6 +243,7 @@ public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
             return Ok(users);
         }
 }
+
 
 
         public class LoginRequest
