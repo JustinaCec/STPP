@@ -210,6 +210,7 @@ namespace SchoolHelpDeskAPI.Controllers
 
             return Ok(new { message = "Logged out successfully" });
         }
+        }
 
 
         public class LoginRequest
