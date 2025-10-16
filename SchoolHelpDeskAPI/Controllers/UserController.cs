@@ -69,7 +69,13 @@ namespace SchoolHelpDeskAPI.Controllers
             };
             return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
-
+ private static string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
         /// <summary>
         /// Atnaujina prieigos (JWT) žetoną naudojant atnaujinimo žetoną.
         /// </summary>
