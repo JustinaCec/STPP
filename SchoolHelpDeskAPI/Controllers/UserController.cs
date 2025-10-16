@@ -69,7 +69,13 @@ namespace SchoolHelpDeskAPI.Controllers
             };
             return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
-
+ private static string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
         /// <summary>
         /// Atnaujina prieigos (JWT) žetoną naudojant atnaujinimo žetoną.
         /// </summary>
@@ -134,8 +140,7 @@ namespace SchoolHelpDeskAPI.Controllers
                 Email = request.Email,
                 Password_Hash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = request.Role ?? "Student",
-                RefreshTokens = new List<string>(),
-                RefreshTokenExpiries = new List<DateTime>()
+                RefreshTokens = new List<RefreshToken>(),
             };
 
             _context.Users.Add(user);
@@ -195,20 +200,28 @@ namespace SchoolHelpDeskAPI.Controllers
         /// Atsijungia vartotoją.
         /// </summary>
         /// <returns>Patvirtinimo pranešimą</returns>
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
-        {
-            var tokenEntry = await _context.RefreshTokens
-                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && rt.RevokedAt == null);
+       [HttpPost("logout")]
+[Authorize]
+public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+{
+    if (request == null || string.IsNullOrEmpty(request.RefreshToken))
+        return BadRequest("Invalid request.");
 
-            if (tokenEntry != null)
-            {
-                tokenEntry.RevokedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
+    // Find the token, even if it was already revoked
+    var tokenEntry = await _context.RefreshTokens
+        .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
 
-            return Ok(new { message = "Logged out successfully" });
+    if (tokenEntry != null && tokenEntry.RevokedAt == null)
+    {
+        // Revoke the token
+        tokenEntry.RevokedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
+
+    // Always return success, even if the token was not found or already revoked
+    return Ok(new { message = "Logged out successfully" });
+}
+
         }
         /// <summary>
         /// Grąžina visų vartotojų sąrašą (tik administratoriams).
