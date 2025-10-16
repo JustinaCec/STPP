@@ -36,7 +36,8 @@ namespace SchoolHelpDeskAPI.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password_Hash))
                 return Unauthorized("Neteisingi prisijungimo duomenys.");
-
+            user.RefreshTokens ??= new List<string>();
+            user.RefreshTokenExpiries ??= new List<DateTime>();
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -83,7 +84,8 @@ public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest req
 
     if (user == null)
         return Unauthorized("Invalid refresh token.");
-
+    user.RefreshTokens ??= new List<string>();
+    user.RefreshTokenExpiries ??= new List<DateTime>();
     int index = user.RefreshTokens.IndexOf(request.RefreshToken);
 
     if (index == -1 || user.RefreshTokenExpiries[index] <= DateTime.UtcNow)
