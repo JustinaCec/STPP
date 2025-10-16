@@ -210,6 +210,28 @@ namespace SchoolHelpDeskAPI.Controllers
 
             return Ok(new { message = "Logged out successfully" });
         }
+        /// <summary>
+        /// Grąžina visų vartotojų sąrašą (tik administratoriams).
+        /// </summary>
+        /// <returns>Vartotojų sąrašą</returns>
+        /// <response code="200">Vartotojai sėkmingai gauti</response>
+        /// <response code="403">Neleidžiama (ne administratorius)</response>
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
+        {
+            var users = await _context.Users
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Email,
+                    u.Role
+                })
+                .ToListAsync();
+
+            return Ok(users);
+        }
+
 
 
         public class LoginRequest
