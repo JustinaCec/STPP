@@ -33,39 +33,43 @@ namespace SchoolHelpDeskAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _context.Users.Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password_Hash))
-                return Unauthorized("Neteisingi prisijungimo duomenys.");
-            user.RefreshTokens ??= new List<string>();
-            user.RefreshTokenExpiries ??= new List<DateTime>();
+                return Unauthorized("Invalid credentials.");
+
+            var jwt = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            user.RefreshTokens.Add(new RefreshToken
+            {
+                Token = refreshToken,
+                Expiry = DateTime.UtcNow.AddDays(7)
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Token = jwt, RefreshToken = refreshToken });
+        }
+
+        private string GenerateJwtToken(User user)
+        {
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim("id", user.Id.ToString()),
-                    new Claim("role", user.Role)
+            new Claim("id", user.Id.ToString()),
+            new Claim("role", user.Role)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+        }
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(token);
-            var refreshToken = GenerateRefreshToken();
-            user.RefreshTokens.Add(refreshToken);
-            user.RefreshTokenExpiries.Add(DateTime.SpecifyKind(DateTime.UtcNow.AddDays(7), DateTimeKind.Utc));
-            await _context.SaveChangesAsync();
-            return Ok(new { Token = jwt, RefreshToken = refreshToken });
-        }
-        private static string GenerateRefreshToken()
-        {
-            var randomBytes = new byte[64];
-            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
-        }
         /// <summary>
         /// Atnaujina prieigos (JWT) žetoną naudojant atnaujinimo žetoną.
         /// </summary>
@@ -73,56 +77,38 @@ namespace SchoolHelpDeskAPI.Controllers
         /// <returns>Naujas prieigos žetonas ir atnaujinimo žetonas</returns>
         /// <response code="200">Naujas prieigos žetonas sėkmingai sugeneruotas</response>
         /// <response code="401">Atnaujinimo žetonas negaliojantis arba pasibaigęs</response>
-[HttpPost("refresh-token")]
-public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
-{
-    if (request is null || string.IsNullOrEmpty(request.RefreshToken))
-        return BadRequest("Invalid request.");
-
-    var user = await _context.Users
-        .FirstOrDefaultAsync(u => u.RefreshTokens.Contains(request.RefreshToken));
-
-    if (user == null)
-        return Unauthorized("Invalid refresh token.");
-    user.RefreshTokens ??= new List<string>();
-    user.RefreshTokenExpiries ??= new List<DateTime>();
-    int index = user.RefreshTokens.IndexOf(request.RefreshToken);
-
-    if (index == -1 || user.RefreshTokenExpiries[index] <= DateTime.UtcNow)
-        return Unauthorized("Refresh token expired.");
-
-    var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-    var tokenHandler = new JwtSecurityTokenHandler();
-    var tokenDescriptor = new SecurityTokenDescriptor
-    {
-        Subject = new ClaimsIdentity(new Claim[]
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            new Claim("id", user.Id.ToString()),
-            new Claim("role", user.Role)
-        }),
-        Expires = DateTime.UtcNow.AddHours(1),
-        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-    };
+            if (request is null || string.IsNullOrEmpty(request.RefreshToken))
+                return BadRequest("Invalid request.");
 
-    var newToken = tokenHandler.CreateToken(tokenDescriptor);
-    var jwt = tokenHandler.WriteToken(newToken);
+            var tokenEntry = await _context.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && rt.RevokedAt == null);
 
-    // Remove used refresh token to invalidate it
-    user.RefreshTokens.RemoveAt(index);
-    user.RefreshTokenExpiries.RemoveAt(index);
+            if (tokenEntry == null || tokenEntry.Expiry <= DateTime.UtcNow)
+                return Unauthorized("Refresh token expired or invalid.");
 
-    var newRefreshToken = GenerateRefreshToken();
-    user.RefreshTokens.Add(newRefreshToken);
-    user.RefreshTokenExpiries.Add(DateTime.SpecifyKind(DateTime.UtcNow.AddDays(7), DateTimeKind.Utc));
+            // Revoke old token
+            tokenEntry.RevokedAt = DateTime.UtcNow;
 
-    await _context.SaveChangesAsync();
+            // Issue new token
+            var jwt = GenerateJwtToken(tokenEntry.User!);
+            var newRefreshToken = GenerateRefreshToken();
 
-    return Ok(new
-    {
-        Token = jwt,
-        RefreshToken = newRefreshToken
-    });
-}
+            _context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = tokenEntry.UserId,
+                Token = newRefreshToken,
+                Expiry = DateTime.UtcNow.AddDays(7)
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Token = jwt, RefreshToken = newRefreshToken });
+        }
+
 
 
         public class RefreshTokenRequest
@@ -213,27 +199,20 @@ public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest req
         [Authorize]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
         {
-            var userId = User.FindFirst("id")?.Value;
-            if (userId == null)
-                return Unauthorized();
+            var tokenEntry = await _context.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && rt.RevokedAt == null);
 
-            var user = await _context.Users.FindAsync(int.Parse(userId));
-            if (user == null)
-                return NotFound();
-
-            int index = user.RefreshTokens.IndexOf(request.RefreshToken);
-            if (index >= 0)
+            if (tokenEntry != null)
             {
-                user.RefreshTokens.RemoveAt(index);
-                user.RefreshTokenExpiries.RemoveAt(index);
+                tokenEntry.RevokedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
 
             return Ok(new { message = "Logged out successfully" });
         }
-    }
 
-    public class LoginRequest
+
+        public class LoginRequest
     {
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
