@@ -200,21 +200,28 @@ namespace SchoolHelpDeskAPI.Controllers
         /// Atsijungia vartotoją.
         /// </summary>
         /// <returns>Patvirtinimo pranešimą</returns>
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
-        {
-            var tokenEntry = await _context.RefreshTokens
-                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && rt.RevokedAt == null);
+       [HttpPost("logout")]
+[Authorize]
+public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+{
+    if (request == null || string.IsNullOrEmpty(request.RefreshToken))
+        return BadRequest("Invalid request.");
 
-            if (tokenEntry != null)
-            {
-                tokenEntry.RevokedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
+    // Find the token, even if it was already revoked
+    var tokenEntry = await _context.RefreshTokens
+        .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
 
-            return Ok(new { message = "Logged out successfully" });
-        }
+    if (tokenEntry != null && tokenEntry.RevokedAt == null)
+    {
+        // Revoke the token
+        tokenEntry.RevokedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
+
+    // Always return success, even if the token was not found or already revoked
+    return Ok(new { message = "Logged out successfully" });
+}
+
         }
 
 
