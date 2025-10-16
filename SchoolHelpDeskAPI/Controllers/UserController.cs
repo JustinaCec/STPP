@@ -244,7 +244,7 @@ public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
 
             return Ok(users);
         }
-
+}
 
 
         public class LoginRequest
