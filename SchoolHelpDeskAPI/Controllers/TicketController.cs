@@ -145,5 +145,24 @@ namespace SchoolHelpDeskAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAll([FromQuery] int? typeId)
+        {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value ?? "0");
+
+            IQueryable<Ticket> query = _context.Tickets.Include(t => t.Comments);
+
+            if (userRole == "Student")
+                query = query.Where(t => t.UserId == userId);
+
+            if (typeId.HasValue)
+                query = query.Where(t => t.TypeId == typeId.Value);
+
+            var tickets = await query.ToListAsync();
+            return Ok(tickets);
+        }
+
     }
 }
