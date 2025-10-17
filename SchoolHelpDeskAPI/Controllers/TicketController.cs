@@ -145,7 +145,7 @@ namespace SchoolHelpDeskAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-        [HttpGet]
+        [HttpGet("byType/{typeId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll([FromQuery] int? typeId)
         {
