@@ -110,11 +110,8 @@ namespace SchoolHelpDeskAPI.Controllers
             existing.Title = ticket.Title;
             existing.Description = ticket.Description;
 
-            if (userRole == "Admin")
-            {
                 existing.TypeId = ticket.TypeId;
                 existing.Status = ticket.Status;
-            }
 
             await _context.SaveChangesAsync();
             return Ok(existing);
